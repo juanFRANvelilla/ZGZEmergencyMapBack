@@ -24,16 +24,6 @@ public class IncidentsZgzDataService {
     @Autowired
     IncidentService incidentService;
 
-//    @Value("${zaragoza.api.url}")
-//    private String apiUrl;
-//
-//    @Value("${zaragoza.api.key}")
-//    private String apiKey;
-//
-//    public ZaragozaApiService(RestTemplate restTemplate) {
-//        this.restTemplate = restTemplate;
-//    }
-
     public IncidentsZgzDataService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
