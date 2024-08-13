@@ -1,5 +1,6 @@
 package com.example.zgzemergencymapback.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -42,6 +43,7 @@ public class Incident {
     private Double longitude;
 
     @OneToMany(mappedBy = "incident", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<IncidentResource> incidentResources = new ArrayList<>();
 
     public void addIncidentResource(IncidentResource incidentResource) {

@@ -1,4 +1,5 @@
 package com.example.zgzemergencymapback.model;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.*;
@@ -19,6 +20,7 @@ public class IncidentResource {
 
     @ManyToOne
     @JoinColumn(name = "incident_id")
+    @JsonBackReference
     private Incident incident;
 
     @ManyToOne

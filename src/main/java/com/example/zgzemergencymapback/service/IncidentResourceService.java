@@ -14,6 +14,16 @@ public class IncidentResourceService {
     @Autowired
     private IncidentResourceRepository incidentResourceRepository;
 
+
+    public void addResourceToIncident(Incident incident, List<Resource> resourceList) {
+        for (Resource resource : resourceList) {
+            IncidentResource incidentResource = new IncidentResource();
+            incidentResource.setIncident(incident);
+            incidentResource.setResource(resource);
+            incidentResourceRepository.save(incidentResource);
+        }
+    }
+
     public List<IncidentResource> findIncidentResourceByIncident(Incident incident) {
         return incidentResourceRepository.findByIncident(incident);
     }

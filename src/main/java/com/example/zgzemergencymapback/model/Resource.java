@@ -23,7 +23,4 @@ public class Resource {
     @Column(name = "name")
     private String name;
 
-    @OneToMany(mappedBy = "resource")
-    private List<IncidentResource> incidentResources;
-
 }

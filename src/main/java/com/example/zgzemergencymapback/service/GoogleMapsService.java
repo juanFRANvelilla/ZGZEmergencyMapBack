@@ -1,39 +1,37 @@
 package com.example.zgzemergencymapback.service;
 
-import com.example.zgzemergencymapback.model.Incident;
+import com.example.zgzemergencymapback.model.CoordinatesAndAddress;
+import com.example.zgzemergencymapback.utils.JsonConverter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClientException;
 
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
-public class IncidentsZgzDataService {
-
+public class GoogleMapsService {
     private final RestTemplate restTemplate;
 
     @Autowired
-    IncidentService incidentService;
+    private JsonConverter jsonConverter;
 
-    public IncidentsZgzDataService(RestTemplate restTemplate) {
+    public GoogleMapsService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
-    public void updateIncidentData() {
-        List<Incident> incidentList = new ArrayList<>();
-    }
-
-    public Object getIncidentData() {
-        String url = "https://www.zaragoza.es/sede/servicio/bomberos?tipo=21&rf=markdown";
-        List<Incident> incidentList = new ArrayList<>();
+    /*
+        * Método que obtiene las coordenadas de una dirección dada
+     */
+    public CoordinatesAndAddress getcoordinates(String address) {
+        String baseUrl = "https://maps.googleapis.com/maps/api/geocode/json";
+        String apiKey = "AIzaSyCQrDqn90BYUBqEXNWAv0hlid1UVCvhLLc";
+        String url = baseUrl + "?address=" + address + "&key=" + apiKey;
+        CoordinatesAndAddress coordinatesAndAddress = new CoordinatesAndAddress();
         try {
             String jsonResponse = restTemplate.getForObject(url, String.class);
+            coordinatesAndAddress = jsonConverter.getCoordinatesFromJson(jsonResponse);
 
-            // Convertir el JSON a objetos Incident y guardarlos en la base de datos
-            incidentList = incidentService.convertJsonToIncidentsAndSaveInDb(jsonResponse);
 
         } catch (RestClientException e) {
             System.err.println("Error al hacer la llamada a la API: " + e.getMessage());
@@ -47,7 +45,6 @@ public class IncidentsZgzDataService {
             System.err.println("Ocurrió un error inesperado: " + e.getMessage());
             e.printStackTrace();
         }
-        return incidentList;
+        return coordinatesAndAddress;
     }
-
 }

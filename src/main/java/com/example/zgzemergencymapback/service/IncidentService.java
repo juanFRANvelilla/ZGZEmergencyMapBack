@@ -1,5 +1,6 @@
 package com.example.zgzemergencymapback.service;
 
+import com.example.zgzemergencymapback.model.CoordinatesAndAddress;
 import com.example.zgzemergencymapback.model.Incident;
 import com.example.zgzemergencymapback.model.IncidentResource;
 import com.example.zgzemergencymapback.model.Resource;
@@ -15,7 +16,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.zgzemergencymapback.utils.JsonConverter.*;
+import static com.example.zgzemergencymapback.utils.LocalTimeConverter.parseDurationToLocalTime;
 
 @Service
 public class IncidentService {
@@ -27,6 +28,11 @@ public class IncidentService {
 
     @Autowired
     private ResourceService resourceService;
+
+    @Autowired
+    private  GoogleMapsService googleMapsService;
+
+
 
 
     public List<Incident> convertJsonToIncidentsAndSaveInDb(String json) throws IOException {
@@ -50,11 +56,12 @@ public class IncidentService {
                 String durationStr = node.path("duracion").asText();
                 LocalTime duration = parseDurationToLocalTime(durationStr);
 
-                // Latitude and Longitude are not in the JSON; you'll need to obtain them separately.
-                Double latitude = null;  // Implement geocoding if needed
-                Double longitude = null; // Implement geocoding if needed
+                CoordinatesAndAddress coordinatesAndAddress = googleMapsService.getcoordinates(address);
 
-                // Parse resources
+                Double latitude = coordinatesAndAddress.getCoordinates().get(0);
+                Double longitude = coordinatesAndAddress.getCoordinates().get(1);
+                address = coordinatesAndAddress.getAddress();
+
                 List<Resource> resourceList = new ArrayList<>();
                 JsonNode resourcesNode = node.path("recursos");
                 for (JsonNode resourceNode : resourcesNode) {
@@ -77,7 +84,7 @@ public class IncidentService {
                 //guardar incident sin resources para poder añadirlos después
                 incidentRepository.save(incident);
                 //agregar filas con las relaciones entre incident y resources
-                addResourceToIncident(incident, resourceList);
+                incidentResourceService.addResourceToIncident(incident, resourceList);
 
                 //obtener las relaciones entre incident y resources
                 List<IncidentResource> incidentResourceList =  incidentResourceService.findIncidentResourceByIncident(incident);
@@ -92,13 +99,6 @@ public class IncidentService {
         return incidentList;
     }
 
-    public void addResourceToIncident(Incident incident, List<Resource> resourceList) {
-        IncidentResource incidentResource = new IncidentResource();
-        for (Resource resource : resourceList) {
-            incidentResource.setIncident(incident);
-            incidentResource.setResource(resource);
-            incidentRepository.save(incident);
-        }
-    }
+
 
 }
