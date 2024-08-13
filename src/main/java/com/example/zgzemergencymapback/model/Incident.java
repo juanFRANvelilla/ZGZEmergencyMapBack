@@ -27,6 +27,9 @@ public class Incident {
     @Column(name = "time", nullable = false)
     private LocalTime time;
 
+    @Column(name = "status", nullable = false)
+    private IncidentStatusEnum status;
+
     @Column(name = "incident_type", nullable = false)
     private String incidentType;
 
