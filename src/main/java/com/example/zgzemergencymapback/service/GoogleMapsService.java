@@ -3,14 +3,23 @@ package com.example.zgzemergencymapback.service;
 import com.example.zgzemergencymapback.model.CoordinatesAndAddress;
 import com.example.zgzemergencymapback.utils.JsonConverter;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.RestClientException;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.File;
+import java.io.IOException;
+
+
 
 @Service
 public class GoogleMapsService {
+    public static final String CONFIG_FILE = "src/main/java/com/example/zgzemergencymapback/config/ApiKey.json";
     private final RestTemplate restTemplate;
 
     @Autowired
@@ -24,8 +33,16 @@ public class GoogleMapsService {
         * Método que obtiene las coordenadas de una dirección dada
      */
     public CoordinatesAndAddress getcoordinates(String address) {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = null;
+        try {
+            root = mapper.readTree(new File(CONFIG_FILE));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        String apiKey = root.path("API_KEY_GOOGLE_MAPS").asText();
+        System.out.println("Google Maps API Key: " + apiKey);
         String baseUrl = "https://maps.googleapis.com/maps/api/geocode/json";
-        String apiKey = "AIzaSyCQrDqn90BYUBqEXNWAv0hlid1UVCvhLLc";
         String url = baseUrl + "?address=" + address + "&key=" + apiKey;
         CoordinatesAndAddress coordinatesAndAddress = new CoordinatesAndAddress();
         try {
