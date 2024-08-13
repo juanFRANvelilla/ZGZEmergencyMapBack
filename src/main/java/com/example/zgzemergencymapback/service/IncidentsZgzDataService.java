@@ -2,6 +2,8 @@ package com.example.zgzemergencymapback.service;
 
 import com.example.zgzemergencymapback.model.Incident;
 import com.example.zgzemergencymapback.model.IncidentStatusEnum;
+import com.example.zgzemergencymapback.repository.IncidentRepository;
+import com.example.zgzemergencymapback.response.IncidentResponseDTO;
 import com.example.zgzemergencymapback.utils.JsonConverter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,8 +24,24 @@ public class IncidentsZgzDataService {
     @Autowired
     JsonConverter jsonConverter;
 
+    @Autowired
+    IncidentRepository incidentRepository;
+
     public IncidentsZgzDataService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
+    }
+
+
+    public IncidentResponseDTO getTodayIncidentData() {
+        LocalDate date = LocalDate.now();
+        List<Incident> incidentList = incidentRepository.findTodayIncident(date);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        return IncidentResponseDTO
+                .builder()
+                .date(date.format(formatter))
+                .size(incidentList.size())
+                .incidentList(incidentList)
+                .build();
     }
 
     /*
@@ -29,7 +50,7 @@ public class IncidentsZgzDataService {
       * introducido en la base de datos o incidentes que se han cerrado
      */
     public List<Incident> getCloseIncidentData() {
-        String url = "https://www.zaragoza.es/sede/servicio/bomberos?tipo=21&rf=markdown";
+        String url = "https://www.zaragoza.es/sede/servicio/bomberos?tipo=20&rf=markdown";
         List<Incident> incidentList = new ArrayList<>();
         try {
             String jsonResponse = restTemplate.getForObject(url, String.class);

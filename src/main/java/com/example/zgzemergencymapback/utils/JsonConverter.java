@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.example.zgzemergencymapback.utils.LocalTimeConverter.parseDurationToLocalTime;
 
 
 @Service
@@ -73,7 +72,7 @@ public class JsonConverter {
             else if(status == IncidentStatusEnum.CLOSED && incidentOptional.get().getStatus() == IncidentStatusEnum.OPEN){
                 Incident incidentToUpdate = incidentOptional.get();
                 incidentToUpdate.setStatus(IncidentStatusEnum.CLOSED);
-                incidentToUpdate.setDuration(incident.getDuration());
+                incidentToUpdate.setDuration(incidentOptional.get().getDuration());
                 incidentService.saveIncident(incidentToUpdate);
                 incidentList.add(incidentToUpdate);
             }
@@ -87,8 +86,7 @@ public class JsonConverter {
         String incidentType = node.path("tipoSiniestro").asText();
         incident.setIncidentType(incidentType);
         String address = node.path("direccion").asText();
-        String durationStr = node.path("duracion").asText();
-        LocalTime duration = parseDurationToLocalTime(durationStr);
+        String duration = node.path("duracion").asText();
         incident.setDuration(duration);
 
         String coordinatesJsonResponse = googleMapsService.getcoordinates(address);

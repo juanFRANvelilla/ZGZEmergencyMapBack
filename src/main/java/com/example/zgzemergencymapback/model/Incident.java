@@ -37,7 +37,7 @@ public class Incident {
     private String address;
 
     @Column(name = "duration", nullable = false)
-    private LocalTime duration;
+    private String duration;
 
     @Column(name = "latitude")
     private Double latitude;
