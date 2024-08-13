@@ -35,36 +35,6 @@ public class JsonConverter {
     @Autowired
     private IncidentResourceService incidentResourceService;
 
-    public CoordinatesAndAddress getCoordinatesFromJson(String json) {
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        JsonNode root = null;
-        try {
-            root = objectMapper.readTree(json);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-        JsonNode locationNode = root.path("results")
-                .path(0);
-
-        double lat = locationNode.path("geometry").path("location").path("lat").asDouble();
-        double lng = locationNode.path("geometry").path("location").path("lng").asDouble();
-
-        List<Double> coordinates = new ArrayList<>();
-        coordinates.add(lat);
-        coordinates.add(lng);
-
-        // Obtener el nombre de la direccion de la respuesta api
-        String adress = locationNode.path("address_components").path(0).path("long_name").asText();
-
-        CoordinatesAndAddress coordinatesAndAddress = CoordinatesAndAddress
-                .builder()
-                .coordinates(coordinates)
-                .address(adress)
-                .build();
-
-        return coordinatesAndAddress;
-    }
 
     /*
      * Método que obtiene datos del json para crear objetos incident
@@ -100,7 +70,7 @@ public class JsonConverter {
             }
             // Si existe un incident en la base de datos con esa fecha y hora
             // pero estaba abierto -> se cierra y actualizamos su duracion
-            else if(incidentOptional.get().getStatus() == IncidentStatusEnum.OPEN){
+            else if(status == IncidentStatusEnum.CLOSED && incidentOptional.get().getStatus() == IncidentStatusEnum.OPEN){
                 Incident incidentToUpdate = incidentOptional.get();
                 incidentToUpdate.setStatus(IncidentStatusEnum.CLOSED);
                 incidentToUpdate.setDuration(incident.getDuration());
@@ -113,7 +83,7 @@ public class JsonConverter {
     }
 
 
-    private Incident completeIncidentDataFromJson(Incident incident, JsonNode node) {
+    public Incident completeIncidentDataFromJson(Incident incident, JsonNode node) {
         String incidentType = node.path("tipoSiniestro").asText();
         incident.setIncidentType(incidentType);
         String address = node.path("direccion").asText();
@@ -154,6 +124,39 @@ public class JsonConverter {
 
         return incident;
     }
+
+
+    public CoordinatesAndAddress getCoordinatesFromJson(String json) {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        JsonNode root = null;
+        try {
+            root = objectMapper.readTree(json);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        JsonNode locationNode = root.path("results")
+                .path(0);
+
+        double lat = locationNode.path("geometry").path("location").path("lat").asDouble();
+        double lng = locationNode.path("geometry").path("location").path("lng").asDouble();
+
+        List<Double> coordinates = new ArrayList<>();
+        coordinates.add(lat);
+        coordinates.add(lng);
+
+        // Obtener el nombre de la direccion de la respuesta api
+        String adress = locationNode.path("address_components").path(0).path("long_name").asText();
+
+        CoordinatesAndAddress coordinatesAndAddress = CoordinatesAndAddress
+                .builder()
+                .coordinates(coordinates)
+                .address(adress)
+                .build();
+
+        return coordinatesAndAddress;
+    }
+
 
 
 }
