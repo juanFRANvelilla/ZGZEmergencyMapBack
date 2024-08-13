@@ -1,15 +1,24 @@
 package com.example.zgzemergencymapback.utils;
 
-import com.example.zgzemergencymapback.model.CoordinatesAndAddress;
+import com.example.zgzemergencymapback.model.*;
+import com.example.zgzemergencymapback.service.GoogleMapsService;
+import com.example.zgzemergencymapback.service.IncidentResourceService;
+import com.example.zgzemergencymapback.service.IncidentService;
 import com.example.zgzemergencymapback.service.ResourceService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
+import static com.example.zgzemergencymapback.utils.LocalTimeConverter.parseDurationToLocalTime;
 
 
 @Service
@@ -17,11 +26,24 @@ public class JsonConverter {
     @Autowired
     private ResourceService resourceService;
 
-    public CoordinatesAndAddress getCoordinatesFromJson(String json) throws IOException {
+    @Autowired
+    private IncidentService incidentService;
+
+    @Autowired
+    private GoogleMapsService googleMapsService;
+
+    @Autowired
+    private IncidentResourceService incidentResourceService;
+
+    public CoordinatesAndAddress getCoordinatesFromJson(String json) {
         ObjectMapper objectMapper = new ObjectMapper();
 
-        JsonNode root = objectMapper.readTree(json);
-
+        JsonNode root = null;
+        try {
+            root = objectMapper.readTree(json);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         JsonNode locationNode = root.path("results")
                 .path(0);
 
@@ -42,6 +64,95 @@ public class JsonConverter {
                 .build();
 
         return coordinatesAndAddress;
+    }
+
+    /*
+     * Método que obtiene datos del json para crear objetos incident
+     * y determinar si es necesario guardarlos en la base de datos
+     */
+    public List<Incident> getIncidentInfoFromJson(String json, IncidentStatusEnum status) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        JsonNode root = objectMapper.readTree(json);
+        JsonNode resultNode = root.path("result");
+
+        List<Incident> incidentList = new ArrayList<>();
+        for (JsonNode node : resultNode) {
+            String fecha = node.path("fecha").asText();
+            String[] dateTime = fecha.split("T");
+            LocalDate date = LocalDate.parse(dateTime[0]);
+            LocalTime time = LocalTime.parse(dateTime[1]);
+
+            Incident incident = Incident.builder()
+                    .date(date)
+                    .time(time)
+                    .status(status)
+                    .build();
+
+            Optional<Incident> incidentOptional = incidentService.getIncidentByDateAndTime(incident.getDate(), incident.getTime());
+            // Si no hay ningun incident en la base de datos con esa fecha y hora
+            // se termina de crear el objeto y guardar en la base de datos
+            if(incidentOptional.isEmpty()){
+                // Completar los datos del incidente
+                incident = completeIncidentDataFromJson(incident, node);
+                incidentList.add(incident);
+
+            }
+            // Si existe un incident en la base de datos con esa fecha y hora
+            // pero estaba abierto -> se cierra y actualizamos su duracion
+            else if(incidentOptional.get().getStatus() == IncidentStatusEnum.OPEN){
+                Incident incidentToUpdate = incidentOptional.get();
+                incidentToUpdate.setStatus(IncidentStatusEnum.CLOSED);
+                incidentToUpdate.setDuration(incident.getDuration());
+                incidentService.saveIncident(incidentToUpdate);
+                incidentList.add(incidentToUpdate);
+            }
+            // Caso en el que ya este registrado el incident y este cerrado, no se actualiza
+        }
+        return incidentList;
+    }
+
+
+    private Incident completeIncidentDataFromJson(Incident incident, JsonNode node) {
+        String incidentType = node.path("tipoSiniestro").asText();
+        incident.setIncidentType(incidentType);
+        String address = node.path("direccion").asText();
+        String durationStr = node.path("duracion").asText();
+        LocalTime duration = parseDurationToLocalTime(durationStr);
+        incident.setDuration(duration);
+
+        String coordinatesJsonResponse = googleMapsService.getcoordinates(address);
+        CoordinatesAndAddress coordinatesAndAddress = getCoordinatesFromJson(coordinatesJsonResponse);
+
+        Double latitude = coordinatesAndAddress.getCoordinates().get(0);
+        Double longitude = coordinatesAndAddress.getCoordinates().get(1);
+        incident.setLatitude(latitude);
+        incident.setLongitude(longitude);
+
+        address = coordinatesAndAddress.getAddress();
+        incident.setAddress(address);
+
+        List<Resource> resourceList = new ArrayList<>();
+        JsonNode resourcesNode = node.path("recursos");
+        for (JsonNode resourceNode : resourcesNode) {
+            resourceService.checkResource(resourceNode.asText());
+            Resource resource = resourceService.findResourceByName(resourceNode.asText());
+            resourceList.add(resource);
+        }
+
+        //guardar incident sin resources para poder añadirlos después
+        incidentService.saveIncident(incident);
+        //agregar filas con las relaciones entre incident y resources
+        incidentResourceService.addResourceToIncident(incident, resourceList);
+
+        //obtener las relaciones entre incident y resources
+        List<IncidentResource> incidentResourceList =  incidentResourceService.findIncidentResourceByIncident(incident);
+        //añadir las relaciones al incident
+        incident.setIncidentResources(incidentResourceList);
+        //guardar el incident con las relaciones
+        incidentService.saveIncident(incident);
+
+        return incident;
     }
 
 
