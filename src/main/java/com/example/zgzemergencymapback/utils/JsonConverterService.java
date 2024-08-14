@@ -21,7 +21,7 @@ import java.util.Optional;
 
 
 @Service
-public class JsonConverter {
+public class JsonConverterService {
     @Autowired
     private ResourceService resourceService;
 
@@ -71,7 +71,7 @@ public class JsonConverter {
             }
             // Si existe un incident en la base de datos con esa fecha y hora
             // pero estaba abierto -> se cierra y actualizamos su duracion
-            else if(status == IncidentStatusEnum.CLOSED && incidentOptional.get().getStatus() == IncidentStatusEnum.OPEN){
+            else if(incidentOptional.isPresent() && incidentOptional.get().getStatus().equals(IncidentStatusEnum.OPEN)){
                 Incident incidentToUpdate = incidentOptional.get();
                 incidentToUpdate.setStatus(IncidentStatusEnum.CLOSED);
                 incidentToUpdate.setDuration(incidentOptional.get().getDuration());
@@ -91,6 +91,43 @@ public class JsonConverter {
         }
     }
 
+    private static String formatAddress(String address) {
+//        address = "FEDERICO *escribir* OZANAM, FEDERICO (Zaragoza) esto es una, sdfsafe .cadena muy raaa, dsjfdslfj &*&(^*(&(*& Ñ";
+        // Primero, eliminamos cualquier texto adicional como "*escribir*"
+        String cleanedInput = address.replaceAll("\\*.*\\*", "").trim();
+
+        // Luego, dividimos la cadena usando ", " como delimitador
+        String[] parts = cleanedInput.split(", ");
+
+        // Verifica que la división haya tenido éxito
+        if (parts.length < 2) {
+//            throw new IllegalArgumentException("Formato de cadena inesperado");
+            return address;
+        }
+
+        // La primera parte contiene la ubicación y la segunda parte contiene el prefijo junto con la ciudad
+        String location = parts[0].trim(); // "OZANAN"
+        String remaining = parts[parts.length - 1].trim(); // "FEDERICO *escribir* OZANAM, FEDERICO (Zaragoza)"
+
+        // Encontramos el índice del primer paréntesis
+        int parenthesisIndex = remaining.indexOf('(');
+
+        if (parenthesisIndex == -1) {
+//            throw new IllegalArgumentException("No se encontró el paréntesis en la cadena");
+            return address;
+        }
+
+        // Extraemos el prefijo y la ciudad
+        String prefix = remaining.substring(0, parenthesisIndex).trim(); // "FEDERICO *escribir* OZANAM,"
+        String city = remaining.substring(parenthesisIndex + 1).replace(")", "").trim(); // "Zaragoza"
+
+        // Limpiamos cualquier texto adicional antes de la ciudad
+        prefix = prefix.replaceAll(",.*", "").trim(); // "FEDERICO"
+
+        // Reensamblamos la cadena formateada
+        return prefix + " " + location + " (" + city + ")";
+    }
+
 
     public Incident completeIncidentDataFromJson(Incident incident, JsonNode node) {
         String incidentType = node.path("tipoSiniestro").asText();
@@ -104,11 +141,18 @@ public class JsonConverter {
 
         // Manejar los casos en los que la api de google maps no devuelve la direccion de calle concreta, sino una generica de zaragoza
         if(!checkCoordinates(coordinatesAndAddress)){
-            // Volver a intntar la llamada api introduciendo termino "calle"
-            coordinatesJsonResponse = googleMapsService.getcoordinates("calle" + address);
+            // Volver a intntar la llamada api formateando la direccion
+
+            String formattedAddress = formatAddress(address);
+
+            coordinatesJsonResponse = googleMapsService.getcoordinates(formattedAddress);
             coordinatesAndAddress = getCoordinatesFromJson(coordinatesJsonResponse);
             if(!checkCoordinates(coordinatesAndAddress)){
-                return null;
+                coordinatesJsonResponse = googleMapsService.getcoordinates("calle " + formattedAddress);
+                coordinatesAndAddress = getCoordinatesFromJson(coordinatesJsonResponse);
+                if(!checkCoordinates(coordinatesAndAddress)){
+                    return null;
+                }
             }
         }
         Double latitude = coordinatesAndAddress.getCoordinates().get(0);
