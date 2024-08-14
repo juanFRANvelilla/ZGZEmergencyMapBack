@@ -34,7 +34,7 @@ public class JsonConverterServiceTest {
 
 
     /*
-     * Test para la funcion de crear un objeto Incident a partir de un json e incluirlo en la db al no existir
+     * Test para comprobar si se guarda en la db un incident nuevo
      */
     @Test
     void testGetNewCloseIncidentInfoFromJson() throws IOException {
@@ -97,10 +97,10 @@ public class JsonConverterServiceTest {
     }
 
     /*
-     * Test para la funcion de crear un objeto Incident a partir de un json y cerrarlo al existir en la db como abierto
+     * Test para comprobar si se actualiza un incidente abierto, que se ha cerrado
      */
     @Test
-    void testUpdateCloseIncidentFromJson() throws IOException {
+    void testUpdateOpenIncidentFromJson() throws IOException {
         // Dado este objeto json
         String json = "{\n" +
                 "  \"totalCount\": 1,\n" +
@@ -136,7 +136,7 @@ public class JsonConverterServiceTest {
                 .build();
 
 
-        IncidentStatusEnum status = IncidentStatusEnum.OPEN;
+        IncidentStatusEnum status = IncidentStatusEnum.CLOSED;
 
         // Mocking
         // Si existe un incidente con esa fecha y hora, ademas esta OPEN
@@ -162,6 +162,69 @@ public class JsonConverterServiceTest {
 
         // LLamada a los métodos de los mocks
         verify(incidentService, times(1)).saveIncident(any(Incident.class));
+        verify(incidentResourceService, times(0)).addResourceToIncident(any(Incident.class), anyList());
+    }
+
+    /*
+     * Test para comprobar si se actualiza un incidente abierto, que aun no se ha cerrado
+     */
+    @Test
+    void testNotUpdateOpenIncidentFromJson() throws IOException {
+        // Dado este objeto json
+        String json = "{\n" +
+                "  \"totalCount\": 1,\n" +
+                "  \"start\": 0,\n" +
+                "  \"rows\": 1,\n" +
+                "  \"fecha\": \"2024-08-14T00:00:00\",\n" +
+                "  \"tipo\": \"10\",\n" +
+                "  \"result\": [\n" +
+                "    {\n" +
+                "      \"fecha\": \"2024-08-13T22:24:04\",\n" +
+                "      \"tipoSiniestro\": \"Accidente de tráfico\",\n" +
+                "      \"direccion\": \"camino monzalbarba (Zaragoza)\",\n" +
+                "      \"duracion\": \"0 h  55 m\",\n" +
+                "      \"recursos\": [\n" +
+                "        \"Bomba pesada mixta\",\n" +
+                "        \"Bomba nodriza pesada\",\n" +
+                "        \"Autoescala automática 30 m.\"\n" +
+                "      ],\n" +
+                "      \"tipo\": \"20\"\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+
+        Incident incidentDb = Incident.builder()
+                .date(LocalDate.of(2024, 8, 14))
+                .time(LocalTime.of(0, 0))
+                .status(IncidentStatusEnum.OPEN)
+                .incidentType("Accidente de tráfico")
+                .address("camino monzalbarba (Zaragoza)")
+                .duration("0 h  55 m")
+                .latitude(40.7128)
+                .longitude(-74.0060)
+                .build();
+
+
+        IncidentStatusEnum status = IncidentStatusEnum.OPEN;
+
+        // Mocking
+        // Si existe un incidente con esa fecha y hora, ademas esta OPEN
+        when(incidentService.getIncidentByDateAndTime(any(LocalDate.class), any(LocalTime.class))).thenReturn(Optional.of(incidentDb));
+        // Crear lista con 3 IncidentResource simulando que son las clases que se encuentrar al buscar en la base de datos
+        List<IncidentResource> incidentResourceList = Arrays.asList(
+                new IncidentResource(),
+                new IncidentResource(),
+                new IncidentResource()
+        );
+
+        // Llamamos al método a testear
+        List<Incident> result = jsonConverterService.getIncidentInfoFromJson(json, status);
+
+        assertEquals(0, result.size());
+
+
+        // LLamada a los métodos de los mocks
+        verify(incidentService, times(0)).saveIncident(any(Incident.class));
         verify(incidentResourceService, times(0)).addResourceToIncident(any(Incident.class), anyList());
     }
 
