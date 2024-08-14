@@ -70,8 +70,12 @@ public class JsonConverterService {
 
             }
             // Si existe un incident en la base de datos con esa fecha y hora
-            // pero estaba abierto -> se cierra y actualizamos su duracion
-            else if(incidentOptional.isPresent() && incidentOptional.get().getStatus().equals(IncidentStatusEnum.OPEN)){
+            // pero estaba abierto -> y la info del json indica que se ha
+            // cerrado actualizamos su status y establecemos duracion
+            else if(incidentOptional.isPresent()
+                    && incidentOptional.get().getStatus().equals(IncidentStatusEnum.OPEN)
+                    && incident.getStatus().equals(IncidentStatusEnum.CLOSED)
+            ){
                 Incident incidentToUpdate = incidentOptional.get();
                 incidentToUpdate.setStatus(IncidentStatusEnum.CLOSED);
                 incidentToUpdate.setDuration(incidentOptional.get().getDuration());
