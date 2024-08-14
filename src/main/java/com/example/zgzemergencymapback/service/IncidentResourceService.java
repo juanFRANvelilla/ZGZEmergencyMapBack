@@ -4,6 +4,7 @@ import com.example.zgzemergencymapback.model.Incident;
 import com.example.zgzemergencymapback.model.IncidentResource;
 import com.example.zgzemergencymapback.model.Resource;
 import com.example.zgzemergencymapback.repository.IncidentResourceRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,11 @@ public class IncidentResourceService {
 
     public List<IncidentResource> findIncidentResourceByIncident(Incident incident) {
         return incidentResourceRepository.findByIncident(incident);
+    }
+
+    @Transactional
+    public void deleteAllIncidentResource() {
+        incidentResourceRepository.deleteAll();
     }
 
 }

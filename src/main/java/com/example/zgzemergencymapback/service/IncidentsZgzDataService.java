@@ -45,20 +45,27 @@ public class IncidentsZgzDataService {
     }
 
     /*
-      * Método que obtiene los datos de los incidentes cerrados de la API de Zaragoza
+      * Método que obtiene los datos de los incidentes de la API de Zaragoza
       * y los guarda en la base de datos, devuelve la lista de incident que se han
       * introducido en la base de datos o incidentes que se han cerrado
      */
-    public List<Incident> getCloseIncidentData() {
-        String url = "https://www.zaragoza.es/sede/servicio/bomberos?tipo=20&rf=markdown";
+    public List<Incident> getIncidentData() {
+        String url = "https://www.zaragoza.es/sede/servicio/bomberos?tipo=21&rf=markdown";
         List<Incident> incidentList = new ArrayList<>();
         try {
             String jsonResponse = restTemplate.getForObject(url, String.class);
 
-            // Convertir json a objetos incident, y llevar a cabo la logica para
+            // Convertir json a objetos incident cerrados, y llevar a cabo la logica para
             // guardar en la base de datos, devuelve la lista de incident que se han
             // introducido en la base de datos o incidentes que se han cerrado
             incidentList = jsonConverter.getIncidentInfoFromJson(jsonResponse, IncidentStatusEnum.CLOSED);
+
+
+            url = "https://www.zaragoza.es/sede/servicio/bomberos?tipo=10&rf=markdown";
+            jsonResponse = restTemplate.getForObject(url, String.class);
+            // Convertir el JSON a objetos Incident abiertos y guardarlos en la base de datos
+            // devuelve la lista de incident que se han introducido en la base de datos
+            incidentList.addAll(jsonConverter.getIncidentInfoFromJson(jsonResponse, IncidentStatusEnum.OPEN));
 
         } catch (RestClientException e) {
             System.err.println("Error al hacer la llamada a la API: " + e.getMessage());
@@ -80,29 +87,29 @@ public class IncidentsZgzDataService {
       * y los guarda en la base de datos, devuelve la lista de incident que se han
       * introducido en la base de datos
      */
-    public List<Incident> getOpenIncidentData() {
-        String url = "https://www.zaragoza.es/sede/servicio/bomberos?tipo=10&rf=markdown";
-        List<Incident> incidentList = new ArrayList<>();
-        try {
-            String jsonResponse = restTemplate.getForObject(url, String.class);
-
-            // Convertir el JSON a objetos Incident y guardarlos en la base de datos
-            // devuelve la lista de incident que se han introducido en la base de datos
-            incidentList = jsonConverter.getIncidentInfoFromJson(jsonResponse, IncidentStatusEnum.OPEN);
-
-        } catch (RestClientException e) {
-            System.err.println("Error al hacer la llamada a la API: " + e.getMessage());
-            e.printStackTrace();
-        } catch (JsonProcessingException e) {
-            // Maneja errores relacionados con la conversión del JSON
-            System.err.println("Error al procesar el JSON: " + e.getMessage());
-            e.printStackTrace();
-        } catch (Exception e) {
-            // Maneja cualquier otro tipo de error no previsto
-            System.err.println("Ocurrió un error inesperado: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return incidentList;
-    }
+//    public List<Incident> getOpenIncidentData() {
+//        String url = "https://www.zaragoza.es/sede/servicio/bomberos?tipo=10&rf=markdown";
+//        List<Incident> incidentList = new ArrayList<>();
+//        try {
+//            String jsonResponse = restTemplate.getForObject(url, String.class);
+//
+//            // Convertir el JSON a objetos Incident y guardarlos en la base de datos
+//            // devuelve la lista de incident que se han introducido en la base de datos
+//            incidentList = jsonConverter.getIncidentInfoFromJson(jsonResponse, IncidentStatusEnum.OPEN);
+//
+//        } catch (RestClientException e) {
+//            System.err.println("Error al hacer la llamada a la API: " + e.getMessage());
+//            e.printStackTrace();
+//        } catch (JsonProcessingException e) {
+//            // Maneja errores relacionados con la conversión del JSON
+//            System.err.println("Error al procesar el JSON: " + e.getMessage());
+//            e.printStackTrace();
+//        } catch (Exception e) {
+//            // Maneja cualquier otro tipo de error no previsto
+//            System.err.println("Ocurrió un error inesperado: " + e.getMessage());
+//            e.printStackTrace();
+//        }
+//        return incidentList;
+//    }
 
 }

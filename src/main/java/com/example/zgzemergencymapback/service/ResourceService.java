@@ -2,6 +2,7 @@ package com.example.zgzemergencymapback.service;
 
 import com.example.zgzemergencymapback.model.Resource;
 import com.example.zgzemergencymapback.repository.ResourceRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,11 @@ public class ResourceService {
 
     public Resource findResourceByName(String name) {
         return resourceRepository.findByName(name);
+    }
+
+    @Transactional
+    public void deleteAllResources() {
+        resourceRepository.deleteAll();
     }
 
 }

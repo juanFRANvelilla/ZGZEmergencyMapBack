@@ -64,7 +64,9 @@ public class JsonConverter {
             if(incidentOptional.isEmpty()){
                 // Completar los datos del incidente
                 incident = completeIncidentDataFromJson(incident, node);
-                incidentList.add(incident);
+                if(incident != null){
+                    incidentList.add(incident);
+                }
 
             }
             // Si existe un incident en la base de datos con esa fecha y hora
@@ -81,6 +83,14 @@ public class JsonConverter {
         return incidentList;
     }
 
+    private static boolean checkCoordinates(CoordinatesAndAddress coordinatesAndAddress){
+        if(coordinatesAndAddress.getCoordinates().get(0) == 41.6474339 && coordinatesAndAddress.getCoordinates().get(1) == -0.8861451){
+            return false;
+        } else {
+            return true;
+        }
+    }
+
 
     public Incident completeIncidentDataFromJson(Incident incident, JsonNode node) {
         String incidentType = node.path("tipoSiniestro").asText();
@@ -92,6 +102,15 @@ public class JsonConverter {
         String coordinatesJsonResponse = googleMapsService.getcoordinates(address);
         CoordinatesAndAddress coordinatesAndAddress = getCoordinatesFromJson(coordinatesJsonResponse);
 
+        // Manejar los casos en los que la api de google maps no devuelve la direccion de calle concreta, sino una generica de zaragoza
+        if(!checkCoordinates(coordinatesAndAddress)){
+            // Volver a intntar la llamada api introduciendo termino "calle"
+            coordinatesJsonResponse = googleMapsService.getcoordinates("calle" + address);
+            coordinatesAndAddress = getCoordinatesFromJson(coordinatesJsonResponse);
+            if(!checkCoordinates(coordinatesAndAddress)){
+                return null;
+            }
+        }
         Double latitude = coordinatesAndAddress.getCoordinates().get(0);
         Double longitude = coordinatesAndAddress.getCoordinates().get(1);
         incident.setLatitude(latitude);
@@ -124,7 +143,7 @@ public class JsonConverter {
     }
 
 
-    public CoordinatesAndAddress getCoordinatesFromJson(String json) {
+    public static CoordinatesAndAddress getCoordinatesFromJson(String json) {
         ObjectMapper objectMapper = new ObjectMapper();
 
         JsonNode root = null;
