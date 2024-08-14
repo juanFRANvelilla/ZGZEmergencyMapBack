@@ -34,7 +34,7 @@ public class IncidentController {
         return incidentsZgzDataService.getIncidentData();
     }
 
-    @GetMapping("/getTodayIncidentData")
+    @GetMapping("/getTodayIncident")
     public IncidentResponseDTO getTodayIncidentData() {
         return incidentsZgzDataService.getTodayIncidentData();
     }
