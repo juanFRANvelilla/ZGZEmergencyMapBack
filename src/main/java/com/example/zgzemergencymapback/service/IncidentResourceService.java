@@ -6,6 +6,7 @@ import com.example.zgzemergencymapback.model.Resource;
 import com.example.zgzemergencymapback.repository.IncidentResourceRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,6 +15,9 @@ import java.util.List;
 public class IncidentResourceService {
     @Autowired
     private IncidentResourceRepository incidentResourceRepository;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
 
     public void addResourceToIncident(Incident incident, List<Resource> resourceList) {
@@ -32,6 +36,7 @@ public class IncidentResourceService {
     @Transactional
     public void deleteAllIncidentResource() {
         incidentResourceRepository.deleteAll();
+        jdbcTemplate.execute("ALTER SEQUENCE incident_resource_id_seq RESTART WITH 1");
     }
 
 }

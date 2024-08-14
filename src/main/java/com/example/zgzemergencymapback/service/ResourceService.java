@@ -4,12 +4,16 @@ import com.example.zgzemergencymapback.model.Resource;
 import com.example.zgzemergencymapback.repository.ResourceRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ResourceService {
     @Autowired
     private ResourceRepository resourceRepository;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     public void checkResource(String name) {
         Resource resource = resourceRepository.findByName(name);
@@ -26,6 +30,7 @@ public class ResourceService {
     @Transactional
     public void deleteAllResources() {
         resourceRepository.deleteAll();
+        jdbcTemplate.execute("ALTER SEQUENCE resource_id_seq RESTART WITH 1");
     }
 
 }

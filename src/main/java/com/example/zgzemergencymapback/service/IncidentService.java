@@ -4,6 +4,7 @@ import com.example.zgzemergencymapback.model.*;
 import com.example.zgzemergencymapback.repository.IncidentRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -15,6 +16,9 @@ import java.util.Optional;
 public class IncidentService {
     @Autowired
     private IncidentRepository incidentRepository;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     public Optional<Incident> getIncidentByDateAndTime(LocalDate date, LocalTime time) {
         return incidentRepository.findByDateAndTime(date, time);
@@ -28,6 +32,7 @@ public class IncidentService {
     @Transactional
     public void deleteAllIncident(){
         incidentRepository.deleteAll();
+        jdbcTemplate.execute("ALTER SEQUENCE incident_id_seq RESTART WITH 1");
     }
 
 }
