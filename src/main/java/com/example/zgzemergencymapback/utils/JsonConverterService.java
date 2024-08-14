@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static com.example.zgzemergencymapback.utils.AdressUtils.checkCoordinates;
+import static com.example.zgzemergencymapback.utils.AdressUtils.formatAddress;
 
 
 @Service
@@ -87,50 +89,7 @@ public class JsonConverterService {
         return incidentList;
     }
 
-    private static boolean checkCoordinates(CoordinatesAndAddress coordinatesAndAddress){
-        if(coordinatesAndAddress.getCoordinates().get(0) == 41.6474339 && coordinatesAndAddress.getCoordinates().get(1) == -0.8861451){
-            return false;
-        } else {
-            return true;
-        }
-    }
 
-    private static String formatAddress(String address) {
-//        address = "FEDERICO *escribir* OZANAM, FEDERICO (Zaragoza) esto es una, sdfsafe .cadena muy raaa, dsjfdslfj &*&(^*(&(*& Ñ";
-        // Primero, eliminamos cualquier texto adicional como "*escribir*"
-        String cleanedInput = address.replaceAll("\\*.*\\*", "").trim();
-
-        // Luego, dividimos la cadena usando ", " como delimitador
-        String[] parts = cleanedInput.split(", ");
-
-        // Verifica que la división haya tenido éxito
-        if (parts.length < 2) {
-//            throw new IllegalArgumentException("Formato de cadena inesperado");
-            return address;
-        }
-
-        // La primera parte contiene la ubicación y la segunda parte contiene el prefijo junto con la ciudad
-        String location = parts[0].trim(); // "OZANAN"
-        String remaining = parts[parts.length - 1].trim(); // "FEDERICO *escribir* OZANAM, FEDERICO (Zaragoza)"
-
-        // Encontramos el índice del primer paréntesis
-        int parenthesisIndex = remaining.indexOf('(');
-
-        if (parenthesisIndex == -1) {
-//            throw new IllegalArgumentException("No se encontró el paréntesis en la cadena");
-            return address;
-        }
-
-        // Extraemos el prefijo y la ciudad
-        String prefix = remaining.substring(0, parenthesisIndex).trim(); // "FEDERICO *escribir* OZANAM,"
-        String city = remaining.substring(parenthesisIndex + 1).replace(")", "").trim(); // "Zaragoza"
-
-        // Limpiamos cualquier texto adicional antes de la ciudad
-        prefix = prefix.replaceAll(",.*", "").trim(); // "FEDERICO"
-
-        // Reensamblamos la cadena formateada
-        return prefix + " " + location + " (" + city + ")";
-    }
 
 
     public Incident completeIncidentDataFromJson(Incident incident, JsonNode node) {
