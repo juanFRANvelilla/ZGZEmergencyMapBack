@@ -1,6 +1,6 @@
 package com.example.zgzemergencymapback.service;
 
-import com.example.zgzemergencymapback.model.Incident;
+import com.example.zgzemergencymapback.model.incident.Incident;
 import com.example.zgzemergencymapback.model.IncidentResource;
 import com.example.zgzemergencymapback.model.Resource;
 import com.example.zgzemergencymapback.repository.IncidentResourceRepository;

@@ -1,7 +1,7 @@
 package com.example.zgzemergencymapback.service;
 
-import com.example.zgzemergencymapback.model.Incident;
-import com.example.zgzemergencymapback.model.IncidentStatusEnum;
+import com.example.zgzemergencymapback.model.incident.Incident;
+import com.example.zgzemergencymapback.model.incident.IncidentStatusEnum;
 import com.example.zgzemergencymapback.utils.JsonConverterService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;

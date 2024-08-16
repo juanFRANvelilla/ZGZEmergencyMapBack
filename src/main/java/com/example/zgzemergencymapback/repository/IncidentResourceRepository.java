@@ -1,8 +1,7 @@
 package com.example.zgzemergencymapback.repository;
 
-import com.example.zgzemergencymapback.model.Incident;
+import com.example.zgzemergencymapback.model.incident.Incident;
 import com.example.zgzemergencymapback.model.IncidentResource;
-import com.example.zgzemergencymapback.model.Resource;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

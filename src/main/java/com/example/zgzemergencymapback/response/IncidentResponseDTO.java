@@ -1,6 +1,6 @@
 package com.example.zgzemergencymapback.response;
 
-import com.example.zgzemergencymapback.model.Incident;
+import com.example.zgzemergencymapback.model.incident.Incident;
 import lombok.*;
 
 import java.util.List;

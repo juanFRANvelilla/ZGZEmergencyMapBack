@@ -1,6 +1,6 @@
 package com.example.zgzemergencymapback.service;
 
-import com.example.zgzemergencymapback.model.*;
+import com.example.zgzemergencymapback.model.incident.Incident;
 import com.example.zgzemergencymapback.repository.IncidentRepository;
 import com.example.zgzemergencymapback.response.IncidentResponseDTO;
 import jakarta.transaction.Transactional;

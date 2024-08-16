@@ -1,6 +1,9 @@
 package com.example.zgzemergencymapback.utils;
 
 import com.example.zgzemergencymapback.model.*;
+import com.example.zgzemergencymapback.model.incident.Incident;
+import com.example.zgzemergencymapback.model.incident.IncidentStatusEnum;
+import com.example.zgzemergencymapback.model.incident.MarkerIconEnum;
 import com.example.zgzemergencymapback.service.GoogleMapsService;
 import com.example.zgzemergencymapback.service.IncidentResourceService;
 import com.example.zgzemergencymapback.service.IncidentService;
@@ -99,6 +102,9 @@ public class JsonConverterService {
     public Incident completeIncidentDataFromJson(Incident incident, JsonNode node) {
         String incidentType = node.path("tipoSiniestro").asText();
         incident.setIncidentType(incidentType);
+
+        incident.setMarkerIcon(MarkerIconEnum.DEFAULT);
+
         String address = node.path("direccion").asText();
 
 

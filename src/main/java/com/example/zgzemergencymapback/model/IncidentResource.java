@@ -1,4 +1,5 @@
 package com.example.zgzemergencymapback.model;
+import com.example.zgzemergencymapback.model.incident.Incident;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;

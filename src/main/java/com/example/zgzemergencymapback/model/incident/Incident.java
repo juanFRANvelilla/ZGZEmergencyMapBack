@@ -1,5 +1,6 @@
-package com.example.zgzemergencymapback.model;
+package com.example.zgzemergencymapback.model.incident;
 
+import com.example.zgzemergencymapback.model.IncidentResource;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -32,6 +33,9 @@ public class Incident {
 
     @Column(name = "incident_type", nullable = false)
     private String incidentType;
+
+    @Column(name = "marker_icon", nullable = false)
+    private MarkerIconEnum markerIcon;
 
     @Column(name = "address", nullable = false)
     private String address;

@@ -1,4 +1,4 @@
-package com.example.zgzemergencymapback.model;
+package com.example.zgzemergencymapback.model.incident;
 
 public enum IncidentStatusEnum {
     OPEN,
