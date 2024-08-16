@@ -31,6 +31,25 @@ public class IncidentsZgzDataService {
     }
 
 
+    /*
+     * Método que obtiene todas las incidencias de una fecha indicada
+     */
+    public IncidentResponseDTO getIncidentByDate(String date) {
+        LocalDate localDate = LocalDate.parse(date);
+        List<Incident> incidentList = incidentRepository.findIncidentByDate(localDate);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        return IncidentResponseDTO
+                .builder()
+                .date(localDate.format(formatter))
+                .size(incidentList.size())
+                .incidentList(incidentList)
+                .build();
+    }
+
+
+    /*
+     * Método que obtiene todas las incidencias del dia de hoy, y aquellas que siguen abiertas
+     */
     public IncidentResponseDTO getTodayIncidentData() {
         LocalDate date = LocalDate.now();
         List<Incident> incidentList = incidentRepository.findTodayIncident(date);
@@ -49,13 +68,13 @@ public class IncidentsZgzDataService {
       * introducido en la base de datos o incidentes que se han cerrado
      */
     public List<Incident> getIncidentData() {
-        String url = "https://www.zaragoza.es/sede/servicio/bomberos?tipo=21&rf=markdown";
+        String url = "https://www.zaragoza.es/sede/servicio/bomberos?tipo=20&rf=markdown";
         List<Incident> incidentList = new ArrayList<>();
         try {
             String jsonResponse = restTemplate.getForObject(url, String.class);
             // Convertir json a objetos incident cerrados, y llevar a cabo la logica para
             // guardar en la base de datos, devuelve la lista de incident que se han
-            // introducido en la base de datos o incidentes que se han cerrado
+            // convertido a objetos
             incidentList = jsonConverterService.getIncidentInfoFromJson(jsonResponse, IncidentStatusEnum.CLOSED);
 
 

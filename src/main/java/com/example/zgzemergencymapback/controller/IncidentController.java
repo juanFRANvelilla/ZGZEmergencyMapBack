@@ -7,6 +7,7 @@ import com.example.zgzemergencymapback.service.IncidentService;
 import com.example.zgzemergencymapback.service.IncidentsZgzDataService;
 import com.example.zgzemergencymapback.service.ResourceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,10 +36,16 @@ public class IncidentController {
         return incidentsZgzDataService.getIncidentData();
     }
 
-    @CrossOrigin(origins = "http://192.168.0.128:3000", allowCredentials = "true")
+    @CrossOrigin(origins = "http://192.168.0.128:8081", allowCredentials = "true")
     @GetMapping("/getTodayIncident")
     public IncidentResponseDTO getTodayIncidentData() {
         return incidentsZgzDataService.getTodayIncidentData();
+    }
+
+    @CrossOrigin(origins = "http://192.168.0.128:8081", allowCredentials = "true")
+    @GetMapping("/getIncidentByDate")
+    public IncidentResponseDTO getIncidentByDate(@Param("date") String date) {
+        return incidentsZgzDataService.getIncidentByDate(date);
     }
 
     @GetMapping("/deleteAll")
