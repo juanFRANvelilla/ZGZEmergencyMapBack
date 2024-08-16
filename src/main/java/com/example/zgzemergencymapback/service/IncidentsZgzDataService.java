@@ -2,8 +2,6 @@ package com.example.zgzemergencymapback.service;
 
 import com.example.zgzemergencymapback.model.Incident;
 import com.example.zgzemergencymapback.model.IncidentStatusEnum;
-import com.example.zgzemergencymapback.repository.IncidentRepository;
-import com.example.zgzemergencymapback.response.IncidentResponseDTO;
 import com.example.zgzemergencymapback.utils.JsonConverterService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,42 +20,10 @@ public class IncidentsZgzDataService {
     private JsonConverterService jsonConverterService;
 
     @Autowired
-    IncidentRepository incidentRepository;
+    IncidentService incidentService;
 
     public IncidentsZgzDataService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
-    }
-
-
-    /*
-     * Método que obtiene todas las incidencias de una fecha indicada
-     */
-    public IncidentResponseDTO getIncidentByDate(String date) {
-        LocalDate localDate = LocalDate.parse(date);
-        List<Incident> incidentList = incidentRepository.findIncidentByDate(localDate);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        return IncidentResponseDTO
-                .builder()
-                .date(localDate.format(formatter))
-                .size(incidentList.size())
-                .incidentList(incidentList)
-                .build();
-    }
-
-
-    /*
-     * Método que obtiene todas las incidencias del dia de hoy, y aquellas que siguen abiertas
-     */
-    public IncidentResponseDTO getTodayIncidentData() {
-        LocalDate date = LocalDate.now();
-        List<Incident> incidentList = incidentRepository.findTodayIncident(date);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        return IncidentResponseDTO
-                .builder()
-                .date(date.format(formatter))
-                .size(incidentList.size())
-                .incidentList(incidentList)
-                .build();
     }
 
     /*
@@ -73,16 +37,18 @@ public class IncidentsZgzDataService {
         try {
             String jsonResponse = restTemplate.getForObject(url, String.class);
             // Convertir json a objetos incident cerrados, y llevar a cabo la logica para
-            // guardar en la base de datos, devuelve la lista de incident que se han
-            // convertido a objetos
+            // guardar en la base de datos, devuelve la lista de incident que se han decodificado
             incidentList = jsonConverterService.getIncidentInfoFromJson(jsonResponse, IncidentStatusEnum.CLOSED);
 
 
             url = "https://www.zaragoza.es/sede/servicio/bomberos?tipo=10&rf=markdown";
             jsonResponse = restTemplate.getForObject(url, String.class);
-            // Convertir el JSON a objetos Incident abiertos y guardarlos en la base de datos
-            // devuelve la lista de incident que se han introducido en la base de datos
-            incidentList.addAll(jsonConverterService.getIncidentInfoFromJson(jsonResponse, IncidentStatusEnum.OPEN));
+            // Convertir el JSON a objetos Incident abiertos, y llevar a cabo la logica para
+            // guardar en la base de datos, devuelve la lista de incident que se han decodificado
+            List<Incident> openIncidentList = jsonConverterService.getIncidentInfoFromJson(jsonResponse, IncidentStatusEnum.OPEN);
+            incidentList.addAll(openIncidentList);
+
+            incidentService.handleLostIncidents(openIncidentList);
 
         } catch (RestClientException e) {
             System.err.println("Error al hacer la llamada a la API: " + e.getMessage());

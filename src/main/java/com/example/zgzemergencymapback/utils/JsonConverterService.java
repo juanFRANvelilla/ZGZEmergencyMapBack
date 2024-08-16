@@ -18,8 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.example.zgzemergencymapback.utils.AdressUtils.checkCoordinates;
-import static com.example.zgzemergencymapback.utils.AdressUtils.formatAddress;
+import static com.example.zgzemergencymapback.utils.AdressUtils.*;
 
 
 @Service
@@ -53,11 +52,13 @@ public class JsonConverterService {
             String[] dateTime = fecha.split("T");
             LocalDate date = LocalDate.parse(dateTime[0]);
             LocalTime time = LocalTime.parse(dateTime[1]);
+            String duration = node.path("duracion").asText();
 
             Incident incident = Incident.builder()
                     .date(date)
                     .time(time)
                     .status(status)
+                    .duration(duration)
                     .build();
 
             Optional<Incident> incidentOptional = incidentService.getIncidentByDateAndTime(incident.getDate(), incident.getTime());
@@ -83,8 +84,11 @@ public class JsonConverterService {
                 incidentToUpdate.setDuration(incidentOptional.get().getDuration());
                 incidentService.saveIncident(incidentToUpdate);
                 incidentList.add(incidentToUpdate);
+            } else{
+                incidentList.add(incidentOptional.get());
+                System.out.println("Este incidente ya estaba previamente registrado " +
+                        "en la base de datos con fecha: " + date + " y hora: " + time + " y estado: " + status);
             }
-            // Caso en el que ya este registrado el incident y este cerrado, no se actualiza
         }
         return incidentList;
     }
@@ -96,25 +100,31 @@ public class JsonConverterService {
         String incidentType = node.path("tipoSiniestro").asText();
         incident.setIncidentType(incidentType);
         String address = node.path("direccion").asText();
-        String duration = node.path("duracion").asText();
-        incident.setDuration(duration);
+
 
         String coordinatesJsonResponse = googleMapsService.getcoordinates(address);
         CoordinatesAndAddress coordinatesAndAddress = getCoordinatesFromJson(coordinatesJsonResponse);
 
         // Manejar los casos en los que la api de google maps no devuelve la direccion de calle concreta, sino una generica de zaragoza
-        if(!checkCoordinates(coordinatesAndAddress)){
+        if(!isAddresValid(coordinatesAndAddress)){
             // Volver a intntar la llamada api formateando la direccion
 
             String formattedAddress = formatAddress(address);
 
             coordinatesJsonResponse = googleMapsService.getcoordinates(formattedAddress);
             coordinatesAndAddress = getCoordinatesFromJson(coordinatesJsonResponse);
-            if(!checkCoordinates(coordinatesAndAddress)){
+            if(!isAddresValid(coordinatesAndAddress)){
                 coordinatesJsonResponse = googleMapsService.getcoordinates("calle " + formattedAddress);
                 coordinatesAndAddress = getCoordinatesFromJson(coordinatesJsonResponse);
-                if(!checkCoordinates(coordinatesAndAddress)){
-                    return null;
+                if(!isAddresValid(coordinatesAndAddress)){
+                    formattedAddress = formatAddress2(address);
+                    coordinatesJsonResponse = googleMapsService.getcoordinates(formattedAddress);
+                    coordinatesAndAddress = getCoordinatesFromJson(coordinatesJsonResponse);
+                    if(!isAddresValid(coordinatesAndAddress)){
+                        System.out.println("No se ha podido obtener la direccion de la api de google maps del incidente: " + incidentType + " con direccion: " + address);
+                        return null;
+                    }
+
                 }
             }
         }

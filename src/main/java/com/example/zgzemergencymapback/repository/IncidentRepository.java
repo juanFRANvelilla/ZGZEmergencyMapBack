@@ -1,7 +1,9 @@
 package com.example.zgzemergencymapback.repository;
 
 import com.example.zgzemergencymapback.model.Incident;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -19,5 +21,17 @@ public interface IncidentRepository extends JpaRepository<Incident, Long> {
 
     @Query("SELECT i FROM Incident i WHERE i.date = :date")
     List<Incident> findIncidentByDate(@Param("date") LocalDate date);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Incident i SET i.status = 1 WHERE i.status = 0")
+    void closeAllOpenIncident();
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Incident i SET i.status = 1 WHERE i.status = 0 AND i.id NOT IN :ids")
+    void closeOtherOpenIncident(@Param("ids") List<Long> ids);
+
+
 
 }
