@@ -39,13 +39,13 @@ public class IncidentController {
     @CrossOrigin(origins = "http://192.168.0.128:8081", allowCredentials = "true")
     @GetMapping("/getTodayIncident")
     public IncidentResponseDTO getTodayIncidentData() {
-        return incidentsZgzDataService.getTodayIncidentData();
+        return incidentService.getTodayIncidentData();
     }
 
     @CrossOrigin(origins = "http://192.168.0.128:8081", allowCredentials = "true")
     @GetMapping("/getIncidentByDate")
     public IncidentResponseDTO getIncidentByDate(@Param("date") String date) {
-        return incidentsZgzDataService.getIncidentByDate(date);
+        return incidentService.getIncidentByDate(date);
     }
 
     @GetMapping("/deleteAll")
