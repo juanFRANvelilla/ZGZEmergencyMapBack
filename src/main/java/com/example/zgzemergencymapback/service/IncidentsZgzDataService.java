@@ -1,5 +1,6 @@
 package com.example.zgzemergencymapback.service;
 
+import com.example.zgzemergencymapback.model.CoordinatesAndAddress;
 import com.example.zgzemergencymapback.model.incident.Incident;
 import com.example.zgzemergencymapback.model.incident.IncidentStatusEnum;
 import com.example.zgzemergencymapback.utils.JsonConverterService;
@@ -10,7 +11,9 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class IncidentsZgzDataService {
@@ -22,6 +25,8 @@ public class IncidentsZgzDataService {
     @Autowired
     IncidentService incidentService;
 
+    private Set<CoordinatesAndAddress> coordinatesAndAddressSet = new HashSet<>();
+
     public IncidentsZgzDataService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
@@ -32,20 +37,22 @@ public class IncidentsZgzDataService {
       * introducido en la base de datos o incidentes que se han cerrado
      */
     public List<Incident> getIncidentData() {
+        // Vaciar el test de coordenadas y direcciones
+        coordinatesAndAddressSet.clear();
         String url = "https://www.zaragoza.es/sede/servicio/bomberos?tipo=20&rf=markdown";
         List<Incident> incidentList = new ArrayList<>();
         try {
             String jsonResponse = restTemplate.getForObject(url, String.class);
             // Convertir json a objetos incident cerrados, y llevar a cabo la logica para
             // guardar en la base de datos, devuelve la lista de incident que se han decodificado
-            incidentList = jsonConverterService.getIncidentInfoFromJson(jsonResponse, IncidentStatusEnum.CLOSED);
+            incidentList = jsonConverterService.getIncidentInfoFromJson(jsonResponse, IncidentStatusEnum.CLOSED, coordinatesAndAddressSet);
 
 
             url = "https://www.zaragoza.es/sede/servicio/bomberos?tipo=10&rf=markdown";
             jsonResponse = restTemplate.getForObject(url, String.class);
             // Convertir el JSON a objetos Incident abiertos, y llevar a cabo la logica para
             // guardar en la base de datos, devuelve la lista de incident que se han decodificado
-            List<Incident> openIncidentList = jsonConverterService.getIncidentInfoFromJson(jsonResponse, IncidentStatusEnum.OPEN);
+            List<Incident> openIncidentList = jsonConverterService.getIncidentInfoFromJson(jsonResponse, IncidentStatusEnum.OPEN, coordinatesAndAddressSet);
             incidentList.addAll(openIncidentList);
 
             incidentService.handleLostIncidents(openIncidentList);

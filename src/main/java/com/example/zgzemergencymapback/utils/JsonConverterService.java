@@ -3,7 +3,6 @@ package com.example.zgzemergencymapback.utils;
 import com.example.zgzemergencymapback.model.*;
 import com.example.zgzemergencymapback.model.incident.Incident;
 import com.example.zgzemergencymapback.model.incident.IncidentStatusEnum;
-import com.example.zgzemergencymapback.model.incident.MarkerIconEnum;
 import com.example.zgzemergencymapback.service.GoogleMapsService;
 import com.example.zgzemergencymapback.service.IncidentResourceService;
 import com.example.zgzemergencymapback.service.IncidentService;
@@ -17,9 +16,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static com.example.zgzemergencymapback.utils.AdressUtils.*;
 
@@ -39,11 +36,14 @@ public class JsonConverterService {
     private IncidentResourceService incidentResourceService;
 
 
+
+
+
     /*
      * Método que obtiene datos del json para crear objetos incident
      * y determinar si es necesario guardarlos en la base de datos
      */
-    public List<Incident> getIncidentInfoFromJson(String json, IncidentStatusEnum status) throws IOException {
+    public List<Incident> getIncidentInfoFromJson(String json, IncidentStatusEnum status, Set<CoordinatesAndAddress> coordinatesAndAddressSet) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
 
         JsonNode root = objectMapper.readTree(json);
@@ -69,7 +69,7 @@ public class JsonConverterService {
             // se termina de crear el objeto y guardar en la base de datos
             if(incidentOptional.isEmpty()){
                 // Completar los datos del incidente
-                incident = completeIncidentDataFromJson(incident, node);
+                incident = completeIncidentDataFromJson(incident, node, coordinatesAndAddressSet);
                 if(incident != null){
                     incidentList.add(incident);
                 }
@@ -99,7 +99,7 @@ public class JsonConverterService {
 
 
 
-    public Incident completeIncidentDataFromJson(Incident incident, JsonNode node) {
+    public Incident completeIncidentDataFromJson(Incident incident, JsonNode node, Set<CoordinatesAndAddress> coordinatesAndAddressSet) {
         String incidentType = node.path("tipoSiniestro").asText();
         incident.setIncidentType(incidentType);
 
@@ -135,6 +135,14 @@ public class JsonConverterService {
                 }
             }
         }
+        // Guardar las nuevas coordenadas en el set general para evitar tener 2 incidentes con las mismas coordenadas
+
+
+        if(!coordinatesAndAddressSet.add(coordinatesAndAddress)){
+            coordinatesAndAddress = adjustCoordinates(coordinatesAndAddress);
+        }
+
+
         Double latitude = coordinatesAndAddress.getCoordinates().get(0);
         Double longitude = coordinatesAndAddress.getCoordinates().get(1);
         incident.setLatitude(latitude);
