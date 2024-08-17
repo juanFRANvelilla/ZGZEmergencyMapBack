@@ -35,7 +35,7 @@ public class Incident {
     private String incidentType;
 
     @Column(name = "marker_icon", nullable = false)
-    private MarkerIconEnum markerIcon;
+    private String markerIcon;
 
     @Column(name = "address", nullable = false)
     private String address;

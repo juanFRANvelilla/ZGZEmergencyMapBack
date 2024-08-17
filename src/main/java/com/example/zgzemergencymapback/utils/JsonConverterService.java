@@ -103,7 +103,8 @@ public class JsonConverterService {
         String incidentType = node.path("tipoSiniestro").asText();
         incident.setIncidentType(incidentType);
 
-        incident.setMarkerIcon(MarkerIconEnum.DEFAULT);
+        String markerIcon = MarkerIconSelector.selectIcon(incidentType.trim().toLowerCase());
+        incident.setMarkerIcon(markerIcon);
 
         String address = node.path("direccion").asText();
 

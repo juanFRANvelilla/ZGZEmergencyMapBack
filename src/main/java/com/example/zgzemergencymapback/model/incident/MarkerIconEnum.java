@@ -4,7 +4,10 @@ public enum MarkerIconEnum {
     DEFAULT,
     FIRE,
     TREE,
-    TRAFFIC,
+    TRAFFIC, // sin comprobar
     ELEVATOR,
-    CONSTRUCTION
+    CONSTRUCTION,
+    ANIMALS,
+    DANGEROUSPRODUCT,
+    BLOCKED
 }
