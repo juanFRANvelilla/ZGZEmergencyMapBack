@@ -15,6 +15,6 @@ public class ScheduledTask {
     @Scheduled(fixedRate = 900000)
     public void executeTask() {
         System.out.println("Ejecutar tarea programada");
-        incidentsZgzDataService.getIncidentData();
+        incidentsZgzDataService.reloadTodayEmergency();
     }
 }
