@@ -34,7 +34,4 @@ public interface IncidentRepository extends JpaRepository<Incident, Long> {
     @Transactional
     @Query("UPDATE Incident i SET i.status = 1 WHERE i.status = 0 AND i.id NOT IN :ids")
     void closeOtherOpenIncident(@Param("ids") List<Long> ids);
-
-
-
 }

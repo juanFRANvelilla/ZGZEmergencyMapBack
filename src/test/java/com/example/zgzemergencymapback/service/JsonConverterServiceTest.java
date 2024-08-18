@@ -7,7 +7,8 @@ import static org.mockito.Mockito.*;
 import com.example.zgzemergencymapback.model.*;
 import com.example.zgzemergencymapback.model.incident.Incident;
 import com.example.zgzemergencymapback.model.incident.IncidentStatusEnum;
-import com.example.zgzemergencymapback.utils.JsonConverterService;
+import com.example.zgzemergencymapback.service.impl.ResourceServiceImpl;
+import com.example.zgzemergencymapback.utils.impl.JsonConverterServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,9 +31,9 @@ public class JsonConverterServiceTest {
     @Mock
     private GoogleMapsService googleMapsService;
     @Mock
-    private ResourceService resourceService;
+    private ResourceServiceImpl resourceService;
     @InjectMocks
-    private JsonConverterService jsonConverterService;
+    private JsonConverterServiceImpl jsonConverterService;
 
 
     /*
