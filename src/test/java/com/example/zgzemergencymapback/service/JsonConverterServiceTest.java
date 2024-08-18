@@ -40,7 +40,6 @@ public class JsonConverterServiceTest {
      */
     @Test
     void testGetNewCloseIncidentInfoFromJson() throws IOException {
-        Set<CoordinatesAndAddress> coordinatesAndAddressSet = new HashSet<>();
         // Dado este objeto json
         String json = "{\n" +
                 "  \"totalCount\": 1,\n" +
@@ -82,7 +81,7 @@ public class JsonConverterServiceTest {
 
 
         // Llamamos al método a testear
-        List<Incident> result = jsonConverterService.getIncidentInfoFromJson(json, status, coordinatesAndAddressSet);
+        List<Incident> result = jsonConverterService.getIncidentInfoFromJson(json, status);
 
         assertEquals(0, result.size());
 
@@ -104,7 +103,6 @@ public class JsonConverterServiceTest {
      */
     @Test
     void testUpdateOpenIncidentFromJson() throws IOException {
-        Set<CoordinatesAndAddress> coordinatesAndAddressSet = new HashSet<>();
         // Dado este objeto json
         String json = "{\n" +
                 "  \"totalCount\": 1,\n" +
@@ -153,7 +151,7 @@ public class JsonConverterServiceTest {
         );
 
         // Llamamos al método a testear
-        List<Incident> result = jsonConverterService.getIncidentInfoFromJson(json, status, coordinatesAndAddressSet);
+        List<Incident> result = jsonConverterService.getIncidentInfoFromJson(json, status);
 
         assertEquals(1, result.size());
 
@@ -174,7 +172,6 @@ public class JsonConverterServiceTest {
      */
     @Test
     void testNotUpdateOpenIncidentFromJson() throws IOException {
-        Set<CoordinatesAndAddress> coordinatesAndAddressSet = new HashSet<>();
         // Dado este objeto json
         String json = "{\n" +
                 "  \"totalCount\": 1,\n" +
@@ -223,7 +220,7 @@ public class JsonConverterServiceTest {
         );
 
         // Llamamos al método a testear
-        List<Incident> result = jsonConverterService.getIncidentInfoFromJson(json, status, coordinatesAndAddressSet);
+        List<Incident> result = jsonConverterService.getIncidentInfoFromJson(json, status);
 
         assertEquals(1, result.size());
 

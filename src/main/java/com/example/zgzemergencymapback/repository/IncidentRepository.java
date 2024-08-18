@@ -16,6 +16,9 @@ public interface IncidentRepository extends JpaRepository<Incident, Long> {
     @Query("SELECT i FROM Incident i WHERE i.date = :date AND i.time = :time")
     Optional<Incident> findByDateAndTime(@Param("date") LocalDate date, @Param("time") LocalTime time);
 
+    @Query("SELECT i FROM Incident i WHERE i.date = :date AND i.latitude = :latitude AND i.longitude = :longitude")
+    Optional<Incident> findIncidentByDateAndCoordinates(@Param("date") LocalDate date, @Param("latitude") Double latitude, @Param("longitude") Double longitude);
+
     @Query("SELECT i FROM Incident i WHERE i.date = :date OR i.status = 0")
     List<Incident> findTodayIncident(@Param("date") LocalDate date);
 

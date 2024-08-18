@@ -43,7 +43,7 @@ public class JsonConverterService {
      * Método que obtiene datos del json para crear objetos incident
      * y determinar si es necesario guardarlos en la base de datos
      */
-    public List<Incident> getIncidentInfoFromJson(String json, IncidentStatusEnum status, Set<CoordinatesAndAddress> coordinatesAndAddressSet) throws IOException {
+    public List<Incident> getIncidentInfoFromJson(String json, IncidentStatusEnum status) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
 
         JsonNode root = objectMapper.readTree(json);
@@ -68,7 +68,7 @@ public class JsonConverterService {
             // se termina de crear el objeto y guardar en la base de datos
             if(incidentOptional.isEmpty()){
                 // Completar los datos del incidente
-                incident = completeIncidentDataFromJson(incident, node, coordinatesAndAddressSet);
+                incident = completeIncidentDataFromJson(incident, node);
                 if(incident != null){
                     incidentList.add(incident);
                 }
@@ -98,7 +98,7 @@ public class JsonConverterService {
 
 
 
-    public Incident completeIncidentDataFromJson(Incident incident, JsonNode node, Set<CoordinatesAndAddress> coordinatesAndAddressSet) {
+    public Incident completeIncidentDataFromJson(Incident incident, JsonNode node) {
         String incidentType = node.path("tipoSiniestro").asText();
         incident.setIncidentType(incidentType);
 
@@ -140,7 +140,11 @@ public class JsonConverterService {
         // Guardar las nuevas coordenadas en el set general para evitar tener 2 incidentes con las mismas coordenadas
 
 
-        if(!coordinatesAndAddressSet.add(coordinatesAndAddress)){
+        if(incidentService.getIncidentByDateAndCoordinates(
+                incident.getDate(),
+                coordinatesAndAddress.getCoordinates().get(0),
+                coordinatesAndAddress.getCoordinates().get(1))
+                .isPresent()){
             coordinatesAndAddress = adjustCoordinates(coordinatesAndAddress);
         }
 

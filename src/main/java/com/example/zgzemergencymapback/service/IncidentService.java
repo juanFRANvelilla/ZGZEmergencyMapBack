@@ -28,6 +28,10 @@ public class IncidentService {
         return incidentRepository.findByDateAndTime(date, time);
     }
 
+    public Optional<Incident> getIncidentByDateAndCoordinates(LocalDate date, Double latitude, Double longitude) {
+        return incidentRepository.findIncidentByDateAndCoordinates(date, latitude, longitude);
+    }
+
     /*
      * Método que obtiene todas las incidencias de una fecha indicada
      */

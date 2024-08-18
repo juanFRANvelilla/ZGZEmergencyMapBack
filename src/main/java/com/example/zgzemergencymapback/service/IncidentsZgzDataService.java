@@ -25,8 +25,6 @@ public class IncidentsZgzDataService {
     @Autowired
     IncidentService incidentService;
 
-    private Set<CoordinatesAndAddress> coordinatesAndAddressSet = new HashSet<>();
-
     public IncidentsZgzDataService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
@@ -37,22 +35,20 @@ public class IncidentsZgzDataService {
       * introducido en la base de datos o incidentes que se han cerrado
      */
     public List<Incident> reloadTodayEmergency() {
-        // Vaciar el test de coordenadas y direcciones
-        coordinatesAndAddressSet.clear();
         String url = "https://www.zaragoza.es/sede/servicio/bomberos?tipo=20&rf=markdown";
         List<Incident> incidentList = new ArrayList<>();
         try {
             String jsonResponse = restTemplate.getForObject(url, String.class);
             // Convertir json a objetos incident cerrados, y llevar a cabo la logica para
             // guardar en la base de datos, devuelve la lista de incident que se han decodificado
-            incidentList = jsonConverterService.getIncidentInfoFromJson(jsonResponse, IncidentStatusEnum.CLOSED, coordinatesAndAddressSet);
+            incidentList = jsonConverterService.getIncidentInfoFromJson(jsonResponse, IncidentStatusEnum.CLOSED);
 
 
             url = "https://www.zaragoza.es/sede/servicio/bomberos?tipo=10&rf=markdown";
             jsonResponse = restTemplate.getForObject(url, String.class);
             // Convertir el JSON a objetos Incident abiertos, y llevar a cabo la logica para
             // guardar en la base de datos, devuelve la lista de incident que se han decodificado
-            List<Incident> openIncidentList = jsonConverterService.getIncidentInfoFromJson(jsonResponse, IncidentStatusEnum.OPEN, coordinatesAndAddressSet);
+            List<Incident> openIncidentList = jsonConverterService.getIncidentInfoFromJson(jsonResponse, IncidentStatusEnum.OPEN);
             incidentList.addAll(openIncidentList);
 
             incidentService.handleLostIncidents(openIncidentList);
@@ -75,13 +71,11 @@ public class IncidentsZgzDataService {
 
 
     public List<Incident> reloadYesterdayEmergency() {
-        // Vaciar el test de coordenadas y direcciones
-        coordinatesAndAddressSet.clear();
         String url = "https://www.zaragoza.es/sede/servicio/bomberos?tipo=21&rf=markdown";
         List<Incident> incidentList = new ArrayList<>();
         try {
             String jsonResponse = restTemplate.getForObject(url, String.class);
-            incidentList = jsonConverterService.getIncidentInfoFromJson(jsonResponse, IncidentStatusEnum.CLOSED, coordinatesAndAddressSet);
+            incidentList = jsonConverterService.getIncidentInfoFromJson(jsonResponse, IncidentStatusEnum.CLOSED);
 
         } catch (RestClientException e) {
             System.err.println("Error al hacer la llamada a la API: " + e.getMessage());
