@@ -9,5 +9,6 @@ public enum MarkerIconEnum {
     CONSTRUCTION,
     ANIMALS,
     DANGEROUSPRODUCT,
-    BLOCKED
+    BLOCKED,
+    WATERDRAINAGE
 }

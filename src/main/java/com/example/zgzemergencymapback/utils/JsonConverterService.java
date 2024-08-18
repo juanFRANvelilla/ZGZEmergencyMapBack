@@ -61,7 +61,6 @@ public class JsonConverterService {
                     .date(date)
                     .time(time)
                     .status(status)
-                    .duration(duration)
                     .build();
 
             Optional<Incident> incidentOptional = incidentService.getIncidentByDateAndTime(incident.getDate(), incident.getTime());
@@ -84,7 +83,7 @@ public class JsonConverterService {
             ){
                 Incident incidentToUpdate = incidentOptional.get();
                 incidentToUpdate.setStatus(IncidentStatusEnum.CLOSED);
-                incidentToUpdate.setDuration(incidentOptional.get().getDuration());
+                incidentToUpdate.setDuration(duration);
                 incidentService.saveIncident(incidentToUpdate);
                 incidentList.add(incidentToUpdate);
             } else{
@@ -107,6 +106,9 @@ public class JsonConverterService {
         incident.setMarkerIcon(markerIcon);
 
         String address = node.path("direccion").asText();
+
+        String duration = node.path("duracion").asText();
+        incident.setDuration(duration);
 
 
         String coordinatesJsonResponse = googleMapsService.getcoordinates(address);

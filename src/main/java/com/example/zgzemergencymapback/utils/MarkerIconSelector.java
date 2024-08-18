@@ -27,8 +27,9 @@ public class MarkerIconSelector {
             return MarkerIconEnum.ELEVATOR.toString();
         } else if (incidentString.contains("trafico")) {
             return MarkerIconEnum.TRAFFIC.toString();
-        }
-        else {
+        } else if (incidentString.contains("achique de agua")) {
+            return MarkerIconEnum.WATERDRAINAGE.toString();
+        } else {
             return MarkerIconEnum.DEFAULT.toString();
         }
     }
