@@ -18,6 +18,8 @@ public class GoogleMapsServiceImpl implements GoogleMapsService {
     public static final String CONFIG_FILE = "src/main/java/com/example/zgzemergencymapback/config/ApiKey.json";
     private final RestTemplate restTemplate;
 
+    private final String googleMapsApiKey = System.getenv("API_GOOGLE_MAPS");
+
 
     public GoogleMapsServiceImpl(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
@@ -36,7 +38,7 @@ public class GoogleMapsServiceImpl implements GoogleMapsService {
         }
         String apiKey = root.path("API_KEY_GOOGLE_MAPS").asText();
         String baseUrl = "https://maps.googleapis.com/maps/api/geocode/json";
-        String url = baseUrl + "?address=" + address + "&key=" + apiKey;
+        String url = baseUrl + "?address=" + address + "&key=" + googleMapsApiKey;
 
         try {
             return restTemplate.getForObject(url, String.class);
