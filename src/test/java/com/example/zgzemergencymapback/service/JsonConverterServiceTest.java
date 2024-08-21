@@ -65,10 +65,11 @@ public class JsonConverterServiceTest {
                 "}";
         IncidentStatusEnum status = IncidentStatusEnum.CLOSED;
 
+
         // Mocking
         // No existe un incidente con esa fecha y hora
         when(incidentService.getIncidentByDateAndTime(any(LocalDate.class), any(LocalTime.class))).thenReturn(Optional.empty());
-        when(googleMapsService.getcoordinates(anyString())).thenReturn("{\"results\": [{\"geometry\": {\"location\": {\"lat\": 40.7128, \"lng\": -74.0060}}, \"address_components\": [{\"long_name\": \"123 Test St\"}]}]}");
+        when(googleMapsService.getcoordinates(anyString())).thenReturn("{\"results\": [{\"geometry\": {\"location\": {\"lat\": 41.64659798837331, \"lng\": -0.8963747510995935}}, \"address_components\": [{\"long_name\": \"123 Test St\"}]}]}");
         // Crear lista con 3 IncidentResource simulando que son las clases que se encuentrar al buscar en la base de datos
         List<IncidentResource> incidentResourceList = Arrays.asList(
                 new IncidentResource(),
@@ -84,13 +85,13 @@ public class JsonConverterServiceTest {
         // Llamamos al método a testear
         List<Incident> result = jsonConverterService.getIncidentInfoFromJson(json, status);
 
-        assertEquals(0, result.size());
+        assertEquals(1, result.size());
 
         Incident firstIncident = result.get(0);
         assertEquals("Accidente de tráfico", firstIncident.getIncidentType());
         assertEquals(IncidentStatusEnum.CLOSED, firstIncident.getStatus());
-        assertEquals(40.7128, firstIncident.getLatitude());
-        assertEquals(-74.0060, firstIncident.getLongitude());
+        assertEquals(41.64659798837331, firstIncident.getLatitude());
+        assertEquals(-0.8963747510995935, firstIncident.getLongitude());
         assertEquals(status, firstIncident.getStatus());
 
 
@@ -127,15 +128,16 @@ public class JsonConverterServiceTest {
                 "  ]\n" +
                 "}";
 
+        // Crear un incidente 'OPEN' simulando que se encuentra en la base de datos
         Incident incidentDb = Incident.builder()
-                .date(LocalDate.of(2024, 8, 14)) // Fecha actual o una fecha específica
-                .time(LocalTime.of(0, 0)) // Hora específica
-                .status(IncidentStatusEnum.OPEN) // Enum de estado, ajusta según el enum disponible
-                .incidentType("Accidente de tráfico") // Tipo de incidente
-                .address("camino monzalbarba (Zaragoza)") // Dirección del incidente
-                .duration("0 h  55 m") // Duración estimada
-                .latitude(40.7128) // Latitud del incidente
-                .longitude(-74.0060) // Longitud del incidente
+                .date(LocalDate.of(2024, 8, 14))
+                .time(LocalTime.of(0, 0))
+                .status(IncidentStatusEnum.OPEN)
+                .incidentType("Accidente de tráfico")
+                .address("camino monzalbarba (Zaragoza)")
+                .duration("")
+                .latitude(41.64659798837331)
+                .longitude(-0.8963747510995935)
                 .build();
 
 
@@ -159,11 +161,16 @@ public class JsonConverterServiceTest {
         Incident firstIncident = result.get(0);
         assertEquals("Accidente de tráfico", firstIncident.getIncidentType());
         assertEquals(IncidentStatusEnum.CLOSED, firstIncident.getStatus());
-        assertEquals(40.7128, firstIncident.getLatitude());
-        assertEquals(-74.0060, firstIncident.getLongitude());
+        assertEquals(41.64659798837331, firstIncident.getLatitude());
+        assertEquals(-0.8963747510995935, firstIncident.getLongitude());
+        assertEquals(-0.8963747510995935, firstIncident.getLongitude());
+        // Comprar que la duracion del incidente devuelto ya no es "" sino que contiene el valor del json simulado
+        assertNotEquals("", firstIncident.getDuration(), "El tipo de incidente no debe ser una cadena vacía");
+        assertEquals("0 h  55 m", firstIncident.getDuration());
 
 
         // LLamada a los métodos de los mocks
+        // Solo se usa una vez .saveIncident() para actualizar el estado de 'OPEN' a 'CLOSED'
         verify(incidentService, times(1)).saveIncident(any(Incident.class));
         verify(incidentResourceService, times(0)).addResourceToIncident(any(Incident.class), anyList());
     }
@@ -203,8 +210,8 @@ public class JsonConverterServiceTest {
                 .incidentType("Accidente de tráfico")
                 .address("camino monzalbarba (Zaragoza)")
                 .duration("0 h  55 m")
-                .latitude(40.7128)
-                .longitude(-74.0060)
+                .latitude(41.64659798837331)
+                .longitude(-0.8963747510995935)
                 .build();
 
 
@@ -227,6 +234,7 @@ public class JsonConverterServiceTest {
 
 
         // LLamada a los métodos de los mocks
+        // Aseguramos que al existir un incidente con esa fecha y hora 'CLOSED' no se actualiza
         verify(incidentService, times(0)).saveIncident(any(Incident.class));
         verify(incidentResourceService, times(0)).addResourceToIncident(any(Incident.class), anyList());
     }
