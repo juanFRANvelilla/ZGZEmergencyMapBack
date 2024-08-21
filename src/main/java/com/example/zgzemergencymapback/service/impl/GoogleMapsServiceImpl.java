@@ -36,9 +36,9 @@ public class GoogleMapsServiceImpl implements GoogleMapsService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        String apiKey = root.path("API_KEY_GOOGLE_MAPS").asText();
+        String apiKey = "AIzaSyC1Ds-domna7VHZ7JvzKJcOVTsEORh-Lyc";
         String baseUrl = "https://maps.googleapis.com/maps/api/geocode/json";
-        String url = baseUrl + "?address=" + address + "&key=" + googleMapsApiKey;
+        String url = baseUrl + "?address=" + address + "&key=" + apiKey;
 
         try {
             return restTemplate.getForObject(url, String.class);
