@@ -41,13 +41,13 @@ public class IncidentController {
         return incidentsZgzDataService.reloadYesterdayEmergency();
     }
 
-    @CrossOrigin(origins = "http://192.168.0.128:8081", allowCredentials = "true")
+    @CrossOrigin(origins = {"http://192.168.0.128:8081", "https://juanfranciscoperez.es"}, allowCredentials = "true")
     @GetMapping("/getTodayIncident")
     public IncidentResponseDTO getTodayIncidentData() {
         return incidentService.getTodayIncidentData();
     }
 
-    @CrossOrigin(origins = "http://192.168.0.128:8081", allowCredentials = "true")
+    @CrossOrigin(origins = {"http://192.168.0.128:8081", "https://juanfranciscoperez.es"}, allowCredentials = "true")
     @GetMapping("/getIncidentByDate")
     public IncidentResponseDTO getIncidentByDate(@Param("date") String date) {
         return incidentService.getIncidentByDate(date);
