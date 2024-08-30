@@ -31,6 +31,7 @@ public class IncidentController {
         * Método que obtiene los datos de los incidentes abiertos y cerrados de la API del Ayuntamiento de Zaragoza
         * y devuelve aquellos incident que se han guardado o actualizado en la base de datos
      */
+    @CrossOrigin(origins = {"http://192.168.0.128:8081", "https://juanfranciscoperez.es"}, allowCredentials = "true")
     @GetMapping("/reloadTodayEmergency")
     public Object reloadTodayEmergency() {
         return incidentsZgzDataService.reloadTodayEmergency();
