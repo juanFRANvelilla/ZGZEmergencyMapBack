@@ -11,8 +11,7 @@ public class ScheduledTask {
     @Autowired
     private IncidentsZgzDataServiceImpl incidentsZgzDataService;
 
-    // Este método se ejecutará cada 15 minutos (900,000 ms)
-    @Scheduled(fixedRate = 900000)
+    @Scheduled(fixedRate = 120000)
     public void executeTask() {
         System.out.println("Ejecutar tarea programada");
         incidentsZgzDataService.reloadTodayEmergency();
